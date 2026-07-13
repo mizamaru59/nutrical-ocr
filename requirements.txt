@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+paddlepaddle==3.2.2
+paddleocr
+numpy<2
+Pillow
+python-dotenv
+pydantic
+httpx
