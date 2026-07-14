@@ -1,4 +1,4 @@
--c constraints.txt
+-c requirements-constraints.txt
 
 fastapi
 uvicorn[standard]
