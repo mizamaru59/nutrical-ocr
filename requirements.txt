@@ -3,6 +3,7 @@ uvicorn[standard]
 python-multipart
 paddlepaddle==3.2.2
 paddleocr
+opencv-python-headless
 numpy<2
 Pillow
 python-dotenv
