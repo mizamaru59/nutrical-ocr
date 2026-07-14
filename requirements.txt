@@ -4,7 +4,7 @@ python-multipart
 paddlepaddle==3.2.2
 paddleocr
 opencv-contrib-python-headless==4.11.0.86
-opencv-python-headless==4.11.0.86
+opencv-python-headless==4.11.0.86 
 numpy<2
 Pillow
 python-dotenv
