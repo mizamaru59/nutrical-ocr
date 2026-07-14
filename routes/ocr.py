@@ -26,26 +26,38 @@ _ocr_engine = None
 def get_ocr_engine():
     """Lazy init de PaddleOCR — chargé uniquement au premier appel."""
     global _ocr_engine
-    if _ocr_engine is None:
-        try:
-            from paddleocr import PaddleOCR
 
-            _ocr_engine = PaddleOCR(
-                lang="fr",
-                text_detection_model_name="PP-OCRv5_mobile_det",
-                text_recognition_model_name="PP-OCRv5_mobile_rec",
-                use_doc_orientation_classify=False,
-                use_doc_unwarping=False,
-                use_textline_orientation=False,
-            )
-            logger.info("PaddleOCR initialisé avec succès")
-        except Exception as e:
-            logger.error(f"Erreur initialisation PaddleOCR : {e}")
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Moteur OCR indisponible.",
-            )
-    return _ocr_engine
+    if _ocr_engine is not None:
+        return _ocr_engine
+
+    try:
+        from paddleocr import PaddleOCR
+
+        logger.info("Initialisation PaddleOCR...")
+
+        engine = PaddleOCR(
+            lang="fr",
+            text_detection_model_name="PP-OCRv5_mobile_det",
+            text_recognition_model_name="PP-OCRv5_mobile_rec",
+            use_doc_orientation_classify=False,
+            use_doc_unwarping=False,
+            use_textline_orientation=False,
+        )
+
+        _ocr_engine = engine
+
+        logger.info("PaddleOCR initialisé avec succès")
+
+        return _ocr_engine
+
+    except Exception as e:
+        _ocr_engine = None
+        logger.exception(f"Erreur initialisation PaddleOCR : {e}")
+
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Moteur OCR indisponible.",
+        )
 
 
 @router.post(
@@ -128,18 +140,18 @@ async def scan_nutrition_label(
             ).model_dump(),
         )
 
-    # 3. Parsing des valeurs nutritionnelles
-    try:
-        nutrition = parse_nutrition(results)
-    except Exception as e:
-        logger.error(f"Erreur parsing : {e}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=OCRErrorResponse(
-                error=ErrorCode.SERVER_ERROR,
-                message="Erreur lors de l'extraction des données.",
-            ).model_dump(),
-        )
+    # # 3. Parsing des valeurs nutritionnelles
+    # try:
+    #     nutrition = parse_nutrition(results)
+    # except Exception as e:
+    #     logger.error(f"Erreur parsing : {e}")
+    #     return JSONResponse(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         content=OCRErrorResponse(
+    #             error=ErrorCode.SERVER_ERROR,
+    #             message="Erreur lors de l'extraction des données.",
+    #         ).model_dump(),
+    #     )
 
     # 4. Vérification résultat
     if nutrition is None:
